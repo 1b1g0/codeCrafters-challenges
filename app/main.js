@@ -22,17 +22,12 @@ const server = net.createServer((socket) => {
         console.log('Desconectado.')
         server.close();
   });
-  server.on('data', (data) => {
-    console.log(data.toString());
-    socket.write(`'HTTP/1.1 200 OK\r\n\r\n`);
-    socket.end()
-    server.close();
+    server.on('data', (data) => {
+        console.log(data.toString());
+        socket.write(`'HTTP/1.1 200 OK\r\n\r\n`);
+        socket.end()
+        server.close();
+    });
 });
-});
-
-
-
-
-const connection = net.createConnection({port: 4221})
 
 server.listen(4221, "localhost");
