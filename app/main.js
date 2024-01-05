@@ -45,7 +45,7 @@ const server = net.createServer((socket) => {
         const res200 = `${version} 200 OK${body}`;
         const res404 = `${version} 404 Not Found${CRLF}`;
         
-        path.match('/echo') || path.match('/user-agent') ? socket.write(res200) : socket.write(res404);
+        path.length < 2 || path.match('/echo') || path.match('/user-agent') ? socket.write(res200) : socket.write(res404);
     });
 
     socket.on("close", () => {
