@@ -13,6 +13,7 @@ const getFile = async (path, fileName) => {
     
     try {
         const dirFiles = await readdir(path);
+        console.log(`Dir files: ${dirFiles}`)
         const file = dirFiles.find(file => file.match(fileName));
         if (!file) {
             return false;
@@ -56,14 +57,14 @@ const getBody = (path, reqHeader) => {
     if (path.match(allowedPaths[2])) {
         
         try {
-            const args = process.argv.slice(2);
-            const filePath = args[1];
+            const filePath = process.argv.slice(2)[1];
+            console.log(`File path: ${filePath}`);
     
             const contentTypeApp = 'Content-Type: application/octet-stream';
             
             //remover /files/
             const fileName = path.slice(7);
-    
+            console.log(`File name: ${fileName}`);
             const found = getFile(filePath, fileName);
             
             return `${lineSep}${contentTypeApp}${lineSep}Content-Length: ${fileLen}${CRLF}${found}`;
