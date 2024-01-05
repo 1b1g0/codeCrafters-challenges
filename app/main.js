@@ -84,7 +84,7 @@ const server = net.createServer(async (socket) => {
     // 'ouvindo' conexoes
     console.log('Conectado com sucesso.')   
     try {
-        await socket.on('data', (data) => {
+        await socket.on('data', async (data) => {
             const headers = data.toString().split(`\r\n`, 3);
             
             const startLine = headers[0].split(' ', 3);
@@ -96,7 +96,7 @@ const server = net.createServer(async (socket) => {
                 return socket.write(res404)
             }
             
-            const body = getBody(startLine[1], headers);
+            const body = await getBody(startLine[1], headers);
             const res200 = `${version} 200 OK${body}`;
             
             socket.write(res200);
