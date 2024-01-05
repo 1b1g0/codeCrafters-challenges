@@ -7,9 +7,12 @@ console.log("Logs from your program will appear here!");
 // Uncomment this to pass the first stage
 const getBody = (path, content) => {
     const contentType = 'Content-Type: text/plain';
-    const fill = path.split('/');
-    const bContent = fill[(fill.length - 1)]
+    const first = path.split('/', 2)[1];
+    
+    const offset = first.length + 2;// +2 = /first/
+    const bContent = path.slice(offset);
     const contentLen = bContent.length;
+    console.log(bContent)
     return `\r\n${contentType}\r\nContent-Length: ${contentLen}${CRLF}${bContent}`;
 }
 const server = net.createServer((socket) => {
@@ -20,7 +23,7 @@ const server = net.createServer((socket) => {
         
         const lineSep = `\r\n`;
         const headers = data.toString().split(`\r\n`, 3);
-        console.log(headers)
+        //console.log(headers)
 
         const startLine = headers[0].split(' ', 3);
         const method = startLine[0];
