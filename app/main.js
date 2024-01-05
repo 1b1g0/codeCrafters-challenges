@@ -80,16 +80,10 @@ const server = net.createServer(async (socket) => {
                 return socket.write(res404)
             }
             
-
             const body = getBody(path, headers);
             const res200 = `${version} 200 OK${body}`;
             
-            
-            path.length < 2 ||
-            path.match('/echo') ||
-            path.match('/user-agent') ||
-            body ?
-            socket.write(res200) : ;
+            socket.write(res200);
         });
 
         socket.on("close", () => {
