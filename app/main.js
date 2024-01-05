@@ -1,7 +1,10 @@
+//@ts-check
+
 const net = require("net");
 const CRLF = `\r\n\r\n`;
 const lineSep = `\r\n`;
-//@ts-check
+const args = process.argv.slice(1);
+
 // You can use print statements as follows for debugging, they'll be visible when running tests.
 console.log("Logs from your program will appear here!");
 
@@ -32,7 +35,7 @@ const getBody = (path, reqHeader) => {
 }
 const server = net.createServer(async (socket) => {
     // 'ouvindo' conexoes
-    console.log('Conectado com sucesso.')   
+    console.log('Conectado com sucesso.', args)   
     try {
         await socket.on('data', (data) => {
             const headers = data.toString().split(`\r\n`, 3);
