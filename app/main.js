@@ -15,22 +15,24 @@ console.log("Logs from your program will appear here!");
 
 const server = net.createServer((socket) => {
     // 'ouvindo' conexoes
-    console.log('Conectado com sucesso.')   
+    console.log('Conectado com sucesso.', socket)   
 
-    socket.write(`HTP/1.1 200 OK\r\n\r\n`);
     socket.on("close", () => {
         socket.end();
         console.log('Desconectado.')
         server.close();
   });
-  
-});
-
-server.on('data', (data) => {
+  server.on('data', (data) => {
     console.log(data.toString());
-    server.end();
+    socket.write(`'HTTP/1.1 200 OK\r\n\r\n`);
+    socket.end()
+    server.close();
+});
 });
 
-const connection = net.createConnection({port: 4221},)
+
+
+
+const connection = net.createConnection({port: 4221})
 
 server.listen(4221, "localhost");
