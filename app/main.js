@@ -14,13 +14,13 @@ const getFile = async (path, fileName) => {
     try {
         const dirFiles = await readdir(path);
         console.log(`Dir files: ${dirFiles}`)
-        const file = dirFiles.find(file => file.match(fileName));
-        if (!file) {
+
+        if (!dirFiles.includes(fileName)) {
             return false;
         } else {
             const fileContent = await readFile(`${path}${fileName}`);
-            fileLen = fileContent.length;
-            return fileContent;
+            const fileLen = fileContent.length;
+            return [fileLen, fileContent];
         }
 
     } catch (error) {
@@ -28,7 +28,7 @@ const getFile = async (path, fileName) => {
     }
 }
 
-const getBody = async (path, reqHeader) => {
+const getBody = async (path, reqHeader, socket) => {
     
     const contentType = 'Content-Type: text/plain';
     if (path.length < 2) {
@@ -65,9 +65,9 @@ const getBody = async (path, reqHeader) => {
             //remover /files/
             const fileName = path.slice(7);
             console.log(`File name: ${fileName}`);
-            const found = await getFile(filePath, fileName);
-            
-            return `${lineSep}${contentTypeApp}${lineSep}Content-Length: ${fileLen}${CRLF}${found}`;
+            const fileInfo = await getFile(filePath, fileName);
+            if (!fileInfo) { socket.write(`${reqHeader[0].split()}`)}
+            return `${lineSep}${contentTypeApp}${lineSep}Content-Length: ${fileInfo[0]}${CRLF}${fileInfo[1]}`;
         } 
         catch (error) {
             console.log('Erro buscando arquivos: '+error.message);
@@ -76,7 +76,6 @@ const getBody = async (path, reqHeader) => {
         
     }
 }
-let fileLen;
 // '' = '/'
 const allowedPaths = ['echo', 'user-agent', 'files', ''];
 
@@ -85,18 +84,32 @@ const server = net.createServer(async (socket) => {
     console.log('Conectado com sucesso.')   
     try {
         await socket.on('data', async (data) => {
-            const headers = data.toString().split(`\r\n`, 3);
-            
+            const headers = data.toString().split(`\r\n`);
+           
             const startLine = headers[0].split(' ', 3);
             const path = startLine[1].split('/', 2)[1];
             const version = startLine[2];
+            
+            const requestHeaders = {
+                startLine: {
+                    method: startLine[0],
+                    target: startLine[1],
+                    version: startLine[2]
+                },
+                userAgent: headers[2]
+            };
+            for (line in headers) {
+                const values = headers[line].split(' ');
+                
+                requestHeaders.values[0] = values[1] ;
+            }
             const res404 = `${version} 404 Not Found${CRLF}`;
 
             if (!allowedPaths.includes(path)) {
                 return socket.write(res404)
             }
             
-            const body = await getBody(startLine[1], headers);
+            const body = await getBody(startLine[1], headers, socket);
             const res200 = `${version} 200 OK${body}`;
             
             socket.write(res200);
