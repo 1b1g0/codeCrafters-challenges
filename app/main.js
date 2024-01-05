@@ -1,7 +1,7 @@
 //@ts-check
 
 const net = require("net");
-const { readdir, } = require("fs/promises");
+const { readdir, readFile } = require("fs/promises");
 const CRLF = `\r\n\r\n`;
 const lineSep = `\r\n`;
 
@@ -10,13 +10,16 @@ console.log("Logs from your program will appear here!");
 
 // Uncomment this to pass the first stage
 const getFile = async (path, fileName) => {
+    
     try {
         const dirFiles = await readdir(path);
         const file = dirFiles.find(file => file.match(fileName));
         if (!file) {
             return false;
         } else {
-            return file;
+            const fileContent = await readFile(`${path}${fileName}`);
+            fileLen = fileContent.length;
+            return fileContent;
         }
 
     } catch (error) {
@@ -25,6 +28,7 @@ const getFile = async (path, fileName) => {
 }
 
 const getBody = (path, reqHeader) => {
+    
     const contentType = 'Content-Type: text/plain';
     if (path.length < 2) {
         return CRLF;
@@ -51,19 +55,30 @@ const getBody = (path, reqHeader) => {
     // /files
     if (path.match(allowedPaths[2])) {
         
-        const args = process.argv.slice(2);
-        const filePath = args[1];
-
-        const contentTypeApp = 'Content-Type: application/octet-stream';
-        const fileName = path.slice(7);
-
-        const found = getFile(filePath, fileName);
+        try {
+            const args = process.argv.slice(2);
+            const filePath = args[1];
+    
+            const contentTypeApp = 'Content-Type: application/octet-stream';
+            
+            //remover /files/
+            const fileName = path.slice(7);
+    
+            const found = getFile(filePath, fileName);
+            
+            return `${lineSep}${contentTypeApp}${lineSep}Content-Length: ${fileLen}${CRLF}${found}`;
+        } 
+        catch (error) {
+            console.log('Erro buscando arquivos: '+error.message);
+        }
        
-        return `${lineSep}${contentTypeApp}${lineSep}Content-Length: ${found.length}${CRLF}${found}`;
         
     }
 }
+let fileLen;
+// '' = '/'
 const allowedPaths = ['echo', 'user-agent', 'files', ''];
+
 const server = net.createServer(async (socket) => {
     // 'ouvindo' conexoes
     console.log('Conectado com sucesso.')   
@@ -72,12 +87,11 @@ const server = net.createServer(async (socket) => {
             const headers = data.toString().split(`\r\n`, 3);
             
             const startLine = headers[0].split(' ', 3);
-            const path = startLine[1];
-            const pathStrip = path.split('/', 2)[1];
+            const path = startLine[1].split('/', 2)[1];
             const version = startLine[2];
             const res404 = `${version} 404 Not Found${CRLF}`;
 
-            if (!allowedPaths.includes(pathStrip)) {
+            if (!allowedPaths.includes(path)) {
                 return socket.write(res404)
             }
             
