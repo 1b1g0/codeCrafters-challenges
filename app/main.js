@@ -30,29 +30,32 @@ const getBody = (path, reqHeader) => {
     }
     
 }
-const server = net.createServer((socket) => {
+const server = net.createServer(async (socket) => {
     // 'ouvindo' conexoes
     console.log('Conectado com sucesso.')   
+    try {
+        await socket.on('data', (data) => {
+            const headers = data.toString().split(`\r\n`, 3);
+            
+            const startLine = headers[0].split(' ', 3);
+            const path = startLine[1];
+            const version = startLine[2];
 
-    socket.on('data', (data) => {
-        const headers = data.toString().split(`\r\n`, 3);
-        
-        const startLine = headers[0].split(' ', 3);
-        const path = startLine[1];
-        const version = startLine[2];
+            const body = getBody(path, headers);
+            const res200 = `${version} 200 OK${body}`;
+            const res404 = `${version} 404 Not Found${CRLF}`;
+            
+            path.length < 2 || path.match('/echo') || path.match('/user-agent') ? socket.write(res200) : socket.write(res404);
+        });
 
-        const body = getBody(path, headers);
-        const res200 = `${version} 200 OK${body}`;
-        const res404 = `${version} 404 Not Found${CRLF}`;
-        
-        path.length < 2 || path.match('/echo') || path.match('/user-agent') ? socket.write(res200) : socket.write(res404);
+        socket.on("close", () => {
+            socket.end();
+            console.log('Desconectado.')
+            server.close();
     });
-
-    socket.on("close", () => {
-        socket.end();
-        console.log('Desconectado.')
-        server.close();
-  });
+} catch (error) {
+        console.log(error.message)
+}
     
 });
 
