@@ -24,7 +24,7 @@ const server = net.createServer((socket) => {
         server.close();
   });
   
-});T
+});
 
 server.on('data', (data) => {
     console.log(data.toString());
