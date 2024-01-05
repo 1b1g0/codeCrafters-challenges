@@ -17,17 +17,18 @@ const server = net.createServer((socket) => {
     // 'ouvindo' conexoes
     console.log('Conectado com sucesso.')   
 
+    server.on('data', (data) => {
+        console.log(typeof data)
+        socket.write(`HTTP/1.1 200 OK\r\n\r\n`);
+        
+    });
+
     socket.on("close", () => {
         socket.end();
         console.log('Desconectado.')
         server.close();
   });
-    server.on('data', (data) => {
-        
-        socket.write(`'HTTP/1.1 200 OK\r\n\r\n`);
-        socket.end()
-        server.close();
-    });
+    
 });
 
 server.listen(4221, "localhost");
