@@ -22,8 +22,6 @@ const getFile = async (path, fileName) => {
     } catch (error) {
         console.log("Erro na função getFile:" + error.message);
     }
-    
-
 }
 
 const getBody = (path, reqHeader) => {
@@ -32,24 +30,26 @@ const getBody = (path, reqHeader) => {
         return CRLF;
     }
     
-    if (path.match('/echo')) {
-        const first = path.split('/', 2)[1];
-        const offset = first.length + 2;// +2 = /first/
-        const bodyContent = path.slice(offset);
+    // /echo
+    if (path.match(allowedPaths[0])) {
+
+        const bodyContent = path.slice(6);
         const contentLen = bodyContent.length;
         console.log(bodyContent)
 
         return `${lineSep}${contentType}${lineSep}Content-Length: ${contentLen}${CRLF}${bodyContent}`;
     }
 
-    if (path.match('/user-agent')) {
+    // /user-agent
+    if (path.match(allowedPaths[1])) {
         const userAgent = reqHeader[2].slice(12);
         const contentLen = userAgent.length;
 
         return `${lineSep}${contentType}${lineSep}Content-Length: ${contentLen}${CRLF}${userAgent}`;
     }
     
-    if (path.match('/files')) {
+    // /files
+    if (path.match(allowedPaths[2])) {
         
         const args = process.argv.slice(2);
         const filePath = args[1];
@@ -63,7 +63,7 @@ const getBody = (path, reqHeader) => {
         
     }
 }
-const allowedPaths = ['/echo', '/user-agent', '/files', '/'];
+const allowedPaths = ['echo', 'user-agent', 'files', ''];
 const server = net.createServer(async (socket) => {
     // 'ouvindo' conexoes
     console.log('Conectado com sucesso.')   
@@ -73,10 +73,11 @@ const server = net.createServer(async (socket) => {
             
             const startLine = headers[0].split(' ', 3);
             const path = startLine[1];
+            const pathStrip = path.split('/', 2)[1];
             const version = startLine[2];
             const res404 = `${version} 404 Not Found${CRLF}`;
 
-            if (!allowedPaths.includes(path)) {
+            if (!allowedPaths.includes(pathStrip)) {
                 return socket.write(res404)
             }
             
