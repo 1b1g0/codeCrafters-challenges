@@ -10,8 +10,18 @@ const server = net.createServer((socket) => {
     console.log('Conectado com sucesso.')   
 
     socket.on('data', (data) => {
-        console.log(data.toString())
-        socket.write(`HTTP/1.1 200 OK\r\n\r\n`);
+        const CRLF = `\r\n\r\n`;
+        const headers = data.toString().split(' ');
+        const method = headers[0];
+        const path = headers[1];
+        const version = headers[2].slice(0,8);
+        console.log(`Method: ${method}\nPath: ${path}\nVesion: ${version}`)
+
+        const res200 = `${version} 200 OK${CRLF}`;
+        const res404 = `${version} 404 Not Found${CRLF}`;
+
+        path == '/' ? socket.write(res200) : socket.write(res404);
+        
         
     });
 
