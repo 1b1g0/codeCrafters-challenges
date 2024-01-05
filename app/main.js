@@ -4,14 +4,29 @@ const net = require("net");
 const { readdir, } = require("fs/promises");
 const CRLF = `\r\n\r\n`;
 const lineSep = `\r\n`;
-// todo: parse args
-const args = process.argv.slice(2);
-const filePath = args[1];
+
 // You can use print statements as follows for debugging, they'll be visible when running tests.
 console.log("Logs from your program will appear here!");
 
 // Uncomment this to pass the first stage
-const getBody = (path, reqHeader, files) => {
+const getFile = async (path, fileName) => {
+    try {
+        const dirFiles = await readdir(path);
+        const file = dirFiles.find(file => file.match(fileName));
+        if (!file) {
+            return false;
+        } else {
+            return file;
+        }
+
+    } catch (error) {
+        console.log("Erro na função getFile:" + error.message);
+    }
+    
+
+}
+
+const getBody = (path, reqHeader) => {
     const contentType = 'Content-Type: text/plain';
     if (path.length < 2) {
         return CRLF;
@@ -36,39 +51,45 @@ const getBody = (path, reqHeader, files) => {
     
     if (path.match('/files')) {
         
+        const args = process.argv.slice(2);
+        const filePath = args[1];
+
         const contentTypeApp = 'Content-Type: application/octet-stream';
-        const filename = path.slice(7);
+        const fileName = path.slice(7);
+
+        const found = getFile(filePath, fileName);
+       
+        return `${lineSep}${contentTypeApp}${lineSep}Content-Length: ${found.length}${CRLF}${found}`;
         
-        const found = files.find(file => file == filename);
-        if (!found) {
-            return false;
-        } else {
-            
-            return `${lineSep}${contentTypeApp}${lineSep}Content-Length: ${found.length}${CRLF}${found}`;
-        }
     }
 }
+const allowedPaths = ['/echo', '/user-agent', '/files', '/'];
 const server = net.createServer(async (socket) => {
     // 'ouvindo' conexoes
-    console.log('Conectado com sucesso.', args)   
+    console.log('Conectado com sucesso.')   
     try {
-        const files = await readdir(filePath);
         await socket.on('data', (data) => {
             const headers = data.toString().split(`\r\n`, 3);
             
             const startLine = headers[0].split(' ', 3);
             const path = startLine[1];
             const version = startLine[2];
-
-            const body = getBody(path, headers, files);
-            const res200 = `${version} 200 OK${body}`;
             const res404 = `${version} 404 Not Found${CRLF}`;
+
+            if (!allowedPaths.includes(path)) {
+                return socket.write(res404)
+            }
+            
+
+            const body = getBody(path, headers);
+            const res200 = `${version} 200 OK${body}`;
+            
             
             path.length < 2 ||
             path.match('/echo') ||
             path.match('/user-agent') ||
             body ?
-            socket.write(res200) : socket.write(res404);
+            socket.write(res200) : ;
         });
 
         socket.on("close", () => {
