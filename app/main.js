@@ -95,7 +95,7 @@ const server = net.createServer(async (socket) => {
                 return socket.write(res404)
             }
             
-            const body = getBody(path, headers);
+            const body = getBody(startLine[1], headers);
             const res200 = `${version} 200 OK${body}`;
             
             socket.write(res200);
