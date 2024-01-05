@@ -28,7 +28,7 @@ const getFile = async (path, fileName) => {
     }
 }
 
-const getBody = (path, reqHeader) => {
+const getBody = async (path, reqHeader) => {
     
     const contentType = 'Content-Type: text/plain';
     if (path.length < 2) {
@@ -65,7 +65,7 @@ const getBody = (path, reqHeader) => {
             //remover /files/
             const fileName = path.slice(7);
             console.log(`File name: ${fileName}`);
-            const found = getFile(filePath, fileName);
+            const found = await getFile(filePath, fileName);
             
             return `${lineSep}${contentTypeApp}${lineSep}Content-Length: ${fileLen}${CRLF}${found}`;
         } 
