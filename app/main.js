@@ -86,7 +86,7 @@ const getBody = async (reqHeader) => {
 
             try {
                 const content = reqHeader.Content;
-                const writePromisse = await writeFile(path, content);
+                const writePromisse = await writeFile(dirPath, content);
                 
                 return [201,'']; // arr size 2 expected
                 
@@ -138,7 +138,7 @@ const server = net.createServer(async (socket) => {
                 }
                 
                 const values = headers[line].split(' ');
-                requestHeaders[values[0].slice(-1)] = values[1];
+                requestHeaders[values[0].slice(0,(values[0].length -1))] = values[1];
             }
             console.log(requestHeaders);  
 
