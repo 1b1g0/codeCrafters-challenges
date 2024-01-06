@@ -133,7 +133,7 @@ const server = net.createServer(async (socket) => {
                 if (line.match('HTTP') || line.match('Host') || line.match('User-Agent')){
                     continue;
                 }
-                if (line == CRLF){
+                if (line.match(CRLF)){
                     requestHeaders['Content'] = line;
                     console.log('Conteudo do arquivo: ' + line.toString());
                     break;
