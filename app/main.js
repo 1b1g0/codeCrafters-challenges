@@ -123,8 +123,6 @@ const server = net.createServer(async (socket) => {
                 socket.write(res404)
                 return socket.end();
             }
-
-            // corrigir, adiciona conteudo do body
         
             for (const line in headers) {               
                 if (headers[line] == '' || line < 3) {
@@ -152,7 +150,7 @@ const server = net.createServer(async (socket) => {
             else {
                 const res200 = `${version} ${body[0]} OK${body[1]}`;
                 socket.write(res200);
-                return socket.end();
+                //return socket.end();
             }
         });
 
