@@ -125,7 +125,8 @@ const server = net.createServer(async (socket) => {
 
             if (body === false) {
                 console.log('entrou no if')
-                return socket.write(res404);
+                socket.write(res404);
+                return socket.end(); 
             } else {
                 const res200 = `${version} 200 OK${body}`;
                 return socket.write(res200);
