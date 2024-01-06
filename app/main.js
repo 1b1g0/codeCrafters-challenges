@@ -87,14 +87,13 @@ const getBody = async (reqHeader) => {
             try {
                 const content = reqHeader.content;
                 const writePromisse = await writeFile(path, content);
-                if (writePromisse === undefined){ 
-                    return [201,'']; // arr size 2 expected
-                } else {
-                    return false;
-                }
+                
+                return [201,'']; // arr size 2 expected
+                
             } catch (error) {
                 console.log(
                 `Erro ao salvar o arquivo ${fileName}: ${error.message}`);
+                return false;
             }
         }
     } 
@@ -139,7 +138,7 @@ const server = net.createServer(async (socket) => {
                 }
                 
                 const values = headers[line].split(' ');
-                requestHeaders[values[0]] = values[1];
+                requestHeaders[values[0].slice(-1)] = values[1];
             }
             console.log(requestHeaders);  
 
