@@ -100,7 +100,7 @@ const server = net.createServer(async (socket) => {
             };
             for (let line in headers) {
                 const values = headers[line].split(' ');
-                requestHeaders.values[0] = values[1] ;
+                requestHeaders[values[0]] = values[1] ;
             }
 
             console.log(requestHeaders)
