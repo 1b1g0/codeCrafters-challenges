@@ -100,10 +100,10 @@ const server = net.createServer(async (socket) => {
             };
             for (const line in headers) {
                 // @ts-ignore
-                if (line == headers.length) {
+                if (line == headers.length - 1) {
                     return
                 }
-                console.log(line, headers.length)
+                
                 const values = headers[line].split(' ');
                 // if (values[0] == '') {
                 //     return
