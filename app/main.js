@@ -126,21 +126,19 @@ const server = net.createServer(async (socket) => {
             }
 
             // corrigir, adiciona conteudo do body
-            headers.forEach((line, i) => {
-
-            })
-            for (const line of headers) {               
-                           
-                if (line.match('HTTP') || line.match('Host') || line.match('User-Agent')){
+        
+            for (const line in headers) {               
+                if (headers[line] == '' || line < 2) {
                     continue;
-                }
-                if (line == ''){
-                    requestHeaders['Content'] = line;
-                    console.log('Conteudo do arquivo: ' + line.toString());
+                }              
+            
+                if (line == (headers.length - 1)){
+                    requestHeaders['Content'] = headers[line].toString();
+                    console.log('Conteudo do arquivo: ' + headers[line].toString());
                     break;
                 }
                 
-                const values = line.split(' ');
+                const values = headers[line].split(' ');
                 requestHeaders[values[0]] = values[1];
             }
             console.log(requestHeaders);  
