@@ -150,7 +150,7 @@ const server = net.createServer(async (socket) => {
             else {
                 const res200 = `${version} ${body[0]} OK${body[1]}`;
                 socket.write(res200);
-                //return socket.end();
+                return socket.end();
             }
         });
 
