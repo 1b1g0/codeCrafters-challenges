@@ -80,14 +80,10 @@ const getBody = async (reqHeader) => {
                 return `${lineSep}${contentTypeApp}${lineSep}Content-Length: 
             ${fileInfo[0]}${CRLF}${fileInfo[1]}`;
             }
-
-            
         } 
         catch (error) {
             console.log('Erro buscando arquivos: '+error.message);
         }
-       
-        
     }
 }
 // '' = '/'
@@ -119,13 +115,9 @@ const server = net.createServer(async (socket) => {
                 const values = line.split(' ');
                 requestHeaders[values[0]] = values[1];
             }
-           
-            
+                  
             const path = requestHeaders.target.split('/', 2)[1];
             const version = requestHeaders.version;
-            
-            
-            //console.log(requestHeaders)
 
             const res404 = `${version} 404 Not Found${CRLF}`;
 
@@ -138,7 +130,7 @@ const server = net.createServer(async (socket) => {
 
             if (body === false) {
                 console.log('entrou no if')
-                return socket.write(res404);
+                socket.write(res404);
             } else {
                 const res200 = `${version} 200 OK${body}`;
                 return socket.write(res200);
