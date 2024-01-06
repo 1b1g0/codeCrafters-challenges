@@ -30,7 +30,7 @@ const getFile = async (path, fileName) => {
     }
 }
 
-const getBody = async (reqHeader, socket) => {
+const getBody = async (reqHeader) => {
     const path = reqHeader.target;
     const userAgent = reqHeader.userAgent.slice(12);
     const contentType = 'Content-Type: text/plain';
@@ -133,7 +133,7 @@ const server = net.createServer(async (socket) => {
                 return socket.write(res404)
             }
             
-            const body = await getBody(requestHeaders, socket);
+            const body = await getBody(requestHeaders);
             console.log('Retorno body:',body)
 
             if (body === false) {
