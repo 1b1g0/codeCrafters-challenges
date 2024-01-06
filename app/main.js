@@ -25,7 +25,7 @@ const getFile = async (path, fileName) => {
 const getBody = async (reqHeader) => {
     // retorna [statuscode, conteudo]
     const path = reqHeader.target;
-    const userAgent = reqHeader.userAgent.slice(12);
+    const userAgent = reqHeader.userAgent;
     const contentType = 'Content-Type: text/plain';
 
     if (path.length < 2) {
@@ -113,7 +113,7 @@ const server = net.createServer(async (socket) => {
                 'method': startLine[0],
                 'target': startLine[1],
                 'version': startLine[2],
-                'userAgent': headers[2]
+                'userAgent': headers[2].split(' ')[1]
             };
             const version = requestHeaders.version;
             const path = requestHeaders.target.split('/', 2)[1];
@@ -151,7 +151,8 @@ const server = net.createServer(async (socket) => {
             } 
             else {
                 const res200 = `${version} ${body[0]} OK${body[1]}`;
-                return socket.write(res200);
+                socket.write(res200);
+                return socket.end();
             }
         });
 
