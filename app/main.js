@@ -74,7 +74,7 @@ const getBody = async (reqHeader, socket) => {
             const fileInfo = await getFile(filePath, fileName);
             console.log('File info: '+fileInfo)
             if (!fileInfo) {
-                return socket.write(`${reqHeader.version} 404 Not Found${CRLF}`);
+                socket.write(`${reqHeader.version} 404 Not Found${CRLF}`);
             } else {
                 return `${lineSep}${contentTypeApp}${lineSep}Content-Length: 
             ${fileInfo[0]}${CRLF}${fileInfo[1]}`;
