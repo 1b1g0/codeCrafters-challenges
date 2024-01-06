@@ -126,14 +126,15 @@ const server = net.createServer(async (socket) => {
             }
 
             // corrigir, adiciona conteudo do body
+            headers.forEach((line, i) => {
+
+            })
             for (const line of headers) {               
-                if (line == '') {
-                    continue;
-                }              
+                           
                 if (line.match('HTTP') || line.match('Host') || line.match('User-Agent')){
                     continue;
                 }
-                if (line.match(CRLF)){
+                if (line == ''){
                     requestHeaders['Content'] = line;
                     console.log('Conteudo do arquivo: ' + line.toString());
                     break;
