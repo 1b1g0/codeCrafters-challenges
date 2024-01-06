@@ -72,9 +72,10 @@ const getBody = async (reqHeader, socket) => {
             const fileName = path.slice(7);
             //console.log(`File name: ${fileName}`);
             const fileInfo = await getFile(filePath, fileName);
-            console.log('File info: '+fileInfo)
+            //console.log('File info: '+fileInfo)
+
             if (!fileInfo) {
-                socket.write(`${reqHeader.version} 404 Not Found${CRLF}`);
+                return false;
             } else {
                 return `${lineSep}${contentTypeApp}${lineSep}Content-Length: 
             ${fileInfo[0]}${CRLF}${fileInfo[1]}`;
@@ -133,6 +134,10 @@ const server = net.createServer(async (socket) => {
             }
             
             const body = await getBody(requestHeaders, socket);
+
+            if (!body) {
+                socket.write(res404);
+            }
             const res200 = `${version} 200 OK${body}`;
             
             socket.write(res200);
