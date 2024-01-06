@@ -13,7 +13,7 @@ const getFile = async (path, fileName) => {
     
     try {
         const dirFiles = await readdir(path);
-        console.log(`Dir files: ${dirFiles}`)
+        //console.log(`Dir files: ${dirFiles}`)
 
         if (!dirFiles.includes(fileName)) {
             console.log('file not found')
@@ -70,15 +70,17 @@ const getBody = async (reqHeader, socket) => {
             
             //remover /files/
             const fileName = path.slice(7);
-            console.log(`File name: ${fileName}`);
+            //console.log(`File name: ${fileName}`);
             const fileInfo = await getFile(filePath, fileName);
-            console.log(fileInfo)
+            console.log('File info: '+fileInfo)
             if (!fileInfo) {
                 return socket.write(`${reqHeader.version} 404 Not Found${CRLF}`);
+            } else {
+                return `${lineSep}${contentTypeApp}${lineSep}Content-Length: 
+            ${fileInfo[0]}${CRLF}${fileInfo[1]}`;
             }
 
-            return `${lineSep}${contentTypeApp}${lineSep}Content-Length: 
-            ${fileInfo[0]}${CRLF}${fileInfo[1]}`;
+            
         } 
         catch (error) {
             console.log('Erro buscando arquivos: '+error.message);
@@ -122,7 +124,7 @@ const server = net.createServer(async (socket) => {
             const version = startLine[2];
             
             
-            console.log(requestHeaders)
+            //console.log(requestHeaders)
 
             const res404 = `${version} 404 Not Found${CRLF}`;
 
