@@ -11,24 +11,14 @@ console.log("Logs from your program will appear here!");
 
 // Uncomment this to pass the first stage
 const getFile = async (path, fileName) => {
-    
     try {
-        //const dirFiles = await readdir(path);
-        const fileExists = existsSync(path)
-        //console.log(`Dir files: ${dirFiles}`)
-
-        if (!fileExists) {
-            console.log('file not found')
-            return false;
-            
-        } else {
-            const fileContent = await readFile(`${path}${fileName}`);
-            const fileLen = fileContent.length;
-            return [fileLen, fileContent];
-        }
+        const fileContent = await readFile(`${path}${fileName}`);
+        const fileLen = fileContent.length;
+        return [fileLen, fileContent];
 
     } catch (error) {
         console.log("Erro na função getFile:" + error.message);
+        return false;
     }
 }
 
@@ -72,13 +62,16 @@ const getBody = async (reqHeader) => {
             
             //remover /files/
             const fileName = path.slice(7);
-            //console.log(`File name: ${fileName}`);
-            const fileInfo = await getFile(filePath, fileName);
+            
+            const fileExists = existsSync(filePath + fileName);
+            
             //console.log('File info: '+fileInfo)
 
-            if (!fileInfo) {
+            if (!fileExists) {
                 return false;
             } else {
+                const fileInfo = await getFile(filePath, fileName);
+                if (!fileInfo) {return false;}
                 return `${lineSep}${contentTypeApp}${lineSep}Content-Length: 
             ${fileInfo[0]}${CRLF}${fileInfo[1]}`;
             }
@@ -132,12 +125,11 @@ const server = net.createServer(async (socket) => {
 
             if (body === false) {
                 console.log('entrou no if')
-                socket.write(`${version} 404 Not Found${CRLF}`);
+                return socket.write(res404);
             } else {
                 const res200 = `${version} 200 OK${body}`;
                 return socket.write(res200);
             }
-            
         });
 
         socket.on("close", () => {
