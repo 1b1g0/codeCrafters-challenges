@@ -148,7 +148,7 @@ const server = net.createServer(async (socket) => {
                 return socket.end(); 
             } 
             else {
-                const res200 = `${version} ${body[0]} OK${body[1]}`;
+                const res200 = `${version} ${body[0]} OK${body[1]}${CRLF}`;
                 socket.write(res200);
                 return socket.end();
             }
