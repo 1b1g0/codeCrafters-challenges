@@ -98,11 +98,12 @@ const server = net.createServer(async (socket) => {
                 },
                 userAgent: headers[2]
             };
-            for (line in headers) {
+            for (let line in headers) {
                 const values = headers[line].split(' ');
-                
                 requestHeaders.values[0] = values[1] ;
             }
+
+            console.log(requestHeaders)
             const res404 = `${version} 404 Not Found${CRLF}`;
 
             if (!allowedPaths.includes(path)) {
