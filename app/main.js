@@ -2,6 +2,7 @@
 
 const net = require("net");
 const { readdir, readFile } = require("fs/promises");
+const { existsSync } = require("fs");
 const CRLF = `\r\n\r\n`;
 const lineSep = `\r\n`;
 
@@ -12,10 +13,11 @@ console.log("Logs from your program will appear here!");
 const getFile = async (path, fileName) => {
     
     try {
-        const dirFiles = await readdir(path);
+        //const dirFiles = await readdir(path);
+        const fileExists = existsSync(path)
         //console.log(`Dir files: ${dirFiles}`)
 
-        if (!dirFiles.includes(fileName)) {
+        if (!fileExists) {
             console.log('file not found')
             return false;
             
