@@ -1,7 +1,7 @@
 //@ts-check
 
 const net = require("net");
-const { readFile } = require("fs/promises");
+const { readFile, writeFile } = require("fs/promises");
 const { existsSync } = require("fs");
 const CRLF = `\r\n\r\n`;
 const lineSep = `\r\n`;
@@ -80,14 +80,18 @@ const getBody = async (reqHeader) => {
             }
         }
         else if (reqHeader.method == 'POST'){
-
            // POST /files/<filename>
            // save it to <directory>/<filename>
            // 201 no body
 
             try {
-
-                
+                const content = reqHeader.content;
+                const writePromisse = await writeFile(path, content);
+                if (writePromisse === undefined){ 
+                    return [201,'']; // arr size 2 expected
+                } else {
+                    return false;
+                }
             } catch (error) {
                 console.log(
                 `Erro ao salvar o arquivo ${fileName}: ${error.message}`);
@@ -106,14 +110,22 @@ const server = net.createServer(async (socket) => {
         socket.on('data', async (data) => {
             const headers = data.toString().split(`\r\n`);
             const startLine = headers[0].split(' ', 3);
-
             const requestHeaders = {     
                 'method': startLine[0],
                 'target': startLine[1],
                 'version': startLine[2],
                 'userAgent': headers[2]
             };
-            
+            const version = requestHeaders.version;
+            const path = requestHeaders.target.split('/', 2)[1];
+            const res404 = `${version} 404 Not Found${CRLF}`;
+
+            if (!allowedPaths.includes(path)) {
+                socket.write(res404)
+                return socket.end();
+            }
+
+            // corrigir, adiciona conteudo do body
             for (const line of headers) {               
                 if (line == '') {
                     continue;
@@ -121,25 +133,21 @@ const server = net.createServer(async (socket) => {
                 if (line.match('HTTP') || line.match('Host') || line.match('User-Agent')){
                     continue;
                 }
+                if (line == CRLF){
+                    requestHeaders['Content'] = line;
+                    console.log('Conteudo do arquivo: ' + line.toString());
+                    break;
+                }
                 
                 const values = line.split(' ');
                 requestHeaders[values[0]] = values[1];
             }
             console.log(requestHeaders);  
-            const path = requestHeaders.target.split('/', 2)[1];
-            const version = requestHeaders.version;
 
-            const res404 = `${version} 404 Not Found${CRLF}`;
-
-            if (!allowedPaths.includes(path)) {
-                socket.write(res404)
-                return socket.end();
-            }
-            
             const body = await getBody(requestHeaders);
-            console.log('Retorno body:',body)
+            console.log('Retorno body: ',body)
 
-            if (body === false) {
+            if (!body) {
                 socket.write(res404);
                 return socket.end(); 
             } 
