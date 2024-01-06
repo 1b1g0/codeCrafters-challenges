@@ -85,7 +85,7 @@ const getBody = async (reqHeader) => {
            // 201 no body
 
             try {
-                const content = reqHeader.content;
+                const content = reqHeader.Content;
                 const writePromisse = await writeFile(path, content);
                 
                 return [201,'']; // arr size 2 expected
