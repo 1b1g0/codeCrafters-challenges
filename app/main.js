@@ -27,12 +27,11 @@ const getBody = async (reqHeader) => {
     const path = reqHeader.target;
     const userAgent = reqHeader.userAgent;
     const contentType = 'Content-Type: text/plain';
-
+    // /
     if (path.length < 2) {
 
         return [200,CRLF];
     }
-    
     // /echo
     if (path.match(allowedPaths[0])) {
 
@@ -43,7 +42,6 @@ const getBody = async (reqHeader) => {
         return [200,`${lineSep}${contentType}${lineSep}Content-Length: 
         ${contentLen}${CRLF}${bodyContent}`];
     }
-
     // /user-agent
     if (path.match(allowedPaths[1])) {
 
@@ -51,8 +49,7 @@ const getBody = async (reqHeader) => {
 
         return [200,`${lineSep}${contentType}${lineSep}Content-Length: 
         ${contentLen}${CRLF}${userAgent}`];
-    }
-    
+    }    
     // /files
     if (path.match(allowedPaths[2])) {
 
@@ -80,10 +77,6 @@ const getBody = async (reqHeader) => {
             }
         }
         else if (reqHeader.method == 'POST'){
-           // POST /files/<filename>
-           // save it to <directory>/<filename>
-           // 201 no body
-
             try {
                 const content = reqHeader.Content;
                 const writePromisse = await writeFile(dirPath+fileName, content);
@@ -138,7 +131,7 @@ const server = net.createServer(async (socket) => {
                 const values = headers[line].split(' ');
                 requestHeaders[values[0].slice(0,(values[0].length -1))] = values[1];
             }
-            console.log(requestHeaders);  
+            //console.log(requestHeaders);  
 
             const body = await getBody(requestHeaders);
             console.log('Retorno body: ',body)
