@@ -101,8 +101,11 @@ const server = net.createServer(async (socket) => {
             
             for (const line of headers) {
                 console.log('it: '+line)
-                if (line == headers[headers.length - 1]) {
+                if (line === headers[headers.length - 1]) {
                     return;
+                }
+                if (line.match('HTTP') || line.match('Host') || line.match('User-Agent')){
+                    continue;
                 }
                 const values = line.split(' ');
                 requestHeaders[values[0]] = values[1];
