@@ -86,7 +86,7 @@ const getBody = async (reqHeader) => {
 
             try {
                 const content = reqHeader.Content;
-                const writePromisse = await writeFile(dirPath, content);
+                const writePromisse = await writeFile(dirPath+fileName, content);
                 
                 return [201,'']; // arr size 2 expected
                 
@@ -127,7 +127,7 @@ const server = net.createServer(async (socket) => {
             // corrigir, adiciona conteudo do body
         
             for (const line in headers) {               
-                if (headers[line] == '' || line < 2) {
+                if (headers[line] == '' || line < 3) {
                     continue;
                 }              
             
