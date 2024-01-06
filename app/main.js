@@ -1,7 +1,7 @@
 //@ts-check
 
 const net = require("net");
-const { readdir, readFile } = require("fs/promises");
+const { readFile } = require("fs/promises");
 const { existsSync } = require("fs");
 const CRLF = `\r\n\r\n`;
 const lineSep = `\r\n`;
@@ -23,12 +23,14 @@ const getFile = async (path, fileName) => {
 }
 
 const getBody = async (reqHeader) => {
+    // retorna [statuscode, conteudo]
     const path = reqHeader.target;
     const userAgent = reqHeader.userAgent.slice(12);
     const contentType = 'Content-Type: text/plain';
 
     if (path.length < 2) {
-        return CRLF;
+
+        return [200,CRLF];
     }
     
     // /echo
@@ -38,8 +40,8 @@ const getBody = async (reqHeader) => {
         const contentLen = bodyContent.length;
         //console.log(bodyContent)
 
-        return `${lineSep}${contentType}${lineSep}Content-Length: 
-        ${contentLen}${CRLF}${bodyContent}`;
+        return [200,`${lineSep}${contentType}${lineSep}Content-Length: 
+        ${contentLen}${CRLF}${bodyContent}`];
     }
 
     // /user-agent
@@ -47,40 +49,53 @@ const getBody = async (reqHeader) => {
 
         const contentLen = userAgent.length;
 
-        return `${lineSep}${contentType}${lineSep}Content-Length: 
-        ${contentLen}${CRLF}${userAgent}`;
+        return [200,`${lineSep}${contentType}${lineSep}Content-Length: 
+        ${contentLen}${CRLF}${userAgent}`];
     }
     
     // /files
     if (path.match(allowedPaths[2])) {
-        
-        try {
-            const filePath = process.argv.slice(2)[1];
-            //console.log(`File path: ${filePath}`);
-    
-            const contentTypeApp = 'Content-Type: application/octet-stream';
-            
-            //remover /files/
-            const fileName = path.slice(7);
-            
-            const fileExists = existsSync(filePath + fileName);
-            
-            //console.log('File info: '+fileInfo)
 
+        const dirPath = process.argv.slice(2)[1];
+        const contentTypeApp = 'Content-Type: application/octet-stream';
+        
+        //remover '/files/'
+        const fileName = path.slice(7);
+        
+        if (reqHeader.method == 'GET'){
+            const fileExists = existsSync(dirPath + fileName);
+            
             if (!fileExists) {
                 return false;
             } else {
-                const fileInfo = await getFile(filePath, fileName);
-                if (!fileInfo) {return false;}
-                return `${lineSep}${contentTypeApp}${lineSep}Content-Length: 
-            ${fileInfo[0]}${CRLF}${fileInfo[1]}`;
+                try {
+                    const fileInfo = await getFile(dirPath, fileName);
+                    if (!fileInfo) {return false;}
+                    return [200,`${lineSep}${contentTypeApp}${lineSep}Content-Length: 
+                    ${fileInfo[0]}${CRLF}${fileInfo[1]}`];
+                }
+                catch (error) {
+                    console.log('Erro buscando arquivos: '+error.message);
+                }
             }
-        } 
-        catch (error) {
-            console.log('Erro buscando arquivos: '+error.message);
         }
-    }
+        else if (reqHeader.method == 'POST'){
+
+           // POST /files/<filename>
+           // save it to <directory>/<filename>
+           // 201 no body
+
+            try {
+
+                
+            } catch (error) {
+                console.log(
+                `Erro ao salvar o arquivo ${fileName}: ${error.message}`);
+            }
+        }
+    } 
 }
+
 // '' = '/'
 const allowedPaths = ['echo', 'user-agent', 'files', ''];
 
@@ -110,25 +125,26 @@ const server = net.createServer(async (socket) => {
                 const values = line.split(' ');
                 requestHeaders[values[0]] = values[1];
             }
-                  
+            console.log(requestHeaders);  
             const path = requestHeaders.target.split('/', 2)[1];
             const version = requestHeaders.version;
 
             const res404 = `${version} 404 Not Found${CRLF}`;
 
             if (!allowedPaths.includes(path)) {
-                return socket.write(res404)
+                socket.write(res404)
+                return socket.end();
             }
             
             const body = await getBody(requestHeaders);
             console.log('Retorno body:',body)
 
             if (body === false) {
-                console.log('entrou no if')
                 socket.write(res404);
                 return socket.end(); 
-            } else {
-                const res200 = `${version} 200 OK${body}`;
+            } 
+            else {
+                const res200 = `${version} ${body[0]} OK${body[1]}`;
                 return socket.write(res200);
             }
         });
