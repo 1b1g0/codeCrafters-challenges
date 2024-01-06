@@ -122,7 +122,7 @@ const server = net.createServer(async (socket) => {
            
             
             const path = requestHeaders.target.split('/', 2)[1];
-            const version = startLine[2];
+            const version = requestHeaders.version;
             
             
             //console.log(requestHeaders)
@@ -134,7 +134,7 @@ const server = net.createServer(async (socket) => {
             }
             
             const body = await getBody(requestHeaders, socket);
-
+            console.log(body)
             if (!body) {
                 socket.write(res404);
             }
