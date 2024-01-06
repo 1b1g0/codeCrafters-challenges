@@ -83,7 +83,7 @@ const server = net.createServer(async (socket) => {
     // 'ouvindo' conexoes
     console.log('Conectado com sucesso.')   
     try {
-            socket.on('data', async (data) => {
+        socket.on('data', async (data) => {
             const headers = data.toString().split(`\r\n`);
            
             const startLine = headers[0].split(' ', 3);
@@ -100,15 +100,15 @@ const server = net.createServer(async (socket) => {
             };
             
             for (const line of headers) {
+                console.log('it: '+line)
                 if (line == headers[headers.length - 1]) {
                     return;
                 }
-
                 const values = line.split(' ');
                 requestHeaders[values[0]] = values[1];
             }
-
             console.log(requestHeaders)
+
             const res404 = `${version} 404 Not Found${CRLF}`;
 
             if (!allowedPaths.includes(path)) {
