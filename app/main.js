@@ -98,9 +98,16 @@ const server = net.createServer(async (socket) => {
                 },
                 userAgent: headers[2]
             };
-            for (let line in headers) {
+            for (const line in headers) {
+                if (line == headers.length) {
+                    return
+                }
+                console.log(line)
                 const values = headers[line].split(' ');
-                requestHeaders[values[0]] = values[1] ;
+                // if (values[0] == '') {
+                //     return
+                // }
+                requestHeaders[values[0]] = values[1];
             }
 
             console.log(requestHeaders)
