@@ -1,15 +1,10 @@
 //@ts-check
-
 const net = require("net");
 const { readFile, writeFile } = require("fs/promises");
 const { existsSync } = require("fs");
 const CRLF = `\r\n\r\n`;
 const lineSep = `\r\n`;
 
-// You can use print statements as follows for debugging, they'll be visible when running tests.
-console.log("Logs from your program will appear here!");
-
-// Uncomment this to pass the first stage
 const getFile = async (path, fileName) => {
     try {
         const fileContent = await readFile(`${path}${fileName}`);
@@ -21,7 +16,6 @@ const getFile = async (path, fileName) => {
         return false;
     }
 }
-
 const getBody = async (reqHeader) => {
     // retorna [statuscode, conteudo]
     const path = reqHeader.target;
@@ -91,13 +85,11 @@ const getBody = async (reqHeader) => {
         }
     } 
 }
-
 // '' = '/'
 const allowedPaths = ['echo', 'user-agent', 'files', ''];
 
 const server = net.createServer(async (socket) => {
-    // 'ouvindo' conexoes
-    console.log('Conectado com sucesso.')   
+    // 'ouvindo' conexoes 
     try {
         socket.on('data', async (data) => {
             const headers = data.toString().split(`\r\n`);
@@ -124,17 +116,15 @@ const server = net.createServer(async (socket) => {
             
                 if (line == (headers.length - 1)){
                     requestHeaders['Content'] = headers[line].toString();
-                    console.log('Conteudo do arquivo: ' + headers[line].toString());
+                    //console.log('Conteudo do arquivo: ' + headers[line].toString());
                     break;
                 }
                 
                 const values = headers[line].split(' ');
                 requestHeaders[values[0].slice(0,(values[0].length -1))] = values[1];
             }
-            //console.log(requestHeaders);  
 
             const body = await getBody(requestHeaders);
-            console.log('Retorno body: ',body)
 
             if (!body) {
                 socket.write(res404);
@@ -151,11 +141,10 @@ const server = net.createServer(async (socket) => {
             socket.end();
             console.log('Desconectado.')
             server.close();
-    });
-} catch (error) {
+        });
+    } catch (error) {
         console.log(error.message)
-}
-    
+    } 
 });
 
 server.listen(4221, "localhost");
