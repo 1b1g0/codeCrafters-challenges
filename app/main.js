@@ -98,13 +98,12 @@ const server = net.createServer(async (socket) => {
                 },
                 userAgent: headers[2]
             };
-            for (const line in headers) {
-                
-                if (Number(line) == headers.length - 1) {
+            for (const line of headers) {
+                if (line == headers[headers.length - 1]) {
                     return;
                 }
 
-                const values = headers[line].split(' ');
+                const values = line.split(' ');
                 requestHeaders[values[0]] = values[1];
             }
 
