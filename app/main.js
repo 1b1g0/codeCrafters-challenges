@@ -102,7 +102,7 @@ const server = net.createServer(async (socket) => {
             for (const line of headers) {
                 console.log('it: '+line)
                 if (line === '') {
-                    return;
+                    continue;
                 }
                 if (line.match('HTTP') || line.match('Host') || line.match('User-Agent')){
                     continue;
