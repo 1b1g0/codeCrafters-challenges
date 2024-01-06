@@ -28,9 +28,11 @@ const getFile = async (path, fileName) => {
     }
 }
 
-const getBody = async (path, reqHeader, socket) => {
-    
+const getBody = async (reqHeader, socket) => {
+    const path = reqHeader.target;
+    const userAgent = reqHeader.userAgent.slice(12);
     const contentType = 'Content-Type: text/plain';
+
     if (path.length < 2) {
         return CRLF;
     }
@@ -40,17 +42,19 @@ const getBody = async (path, reqHeader, socket) => {
 
         const bodyContent = path.slice(6);
         const contentLen = bodyContent.length;
-        console.log(bodyContent)
+        //console.log(bodyContent)
 
-        return `${lineSep}${contentType}${lineSep}Content-Length: ${contentLen}${CRLF}${bodyContent}`;
+        return `${lineSep}${contentType}${lineSep}Content-Length: 
+        ${contentLen}${CRLF}${bodyContent}`;
     }
 
     // /user-agent
     if (path.match(allowedPaths[1])) {
-        const userAgent = reqHeader[2].slice(12);
+
         const contentLen = userAgent.length;
 
-        return `${lineSep}${contentType}${lineSep}Content-Length: ${contentLen}${CRLF}${userAgent}`;
+        return `${lineSep}${contentType}${lineSep}Content-Length: 
+        ${contentLen}${CRLF}${userAgent}`;
     }
     
     // /files
@@ -58,7 +62,7 @@ const getBody = async (path, reqHeader, socket) => {
         
         try {
             const filePath = process.argv.slice(2)[1];
-            console.log(`File path: ${filePath}`);
+            //console.log(`File path: ${filePath}`);
     
             const contentTypeApp = 'Content-Type: application/octet-stream';
             
@@ -66,8 +70,13 @@ const getBody = async (path, reqHeader, socket) => {
             const fileName = path.slice(7);
             console.log(`File name: ${fileName}`);
             const fileInfo = await getFile(filePath, fileName);
-            if (!fileInfo) { socket.write(`${reqHeader[0].split()}`)}
-            return `${lineSep}${contentTypeApp}${lineSep}Content-Length: ${fileInfo[0]}${CRLF}${fileInfo[1]}`;
+
+            if (!fileInfo) {
+                return socket.write(`${reqHeader.version} 404 Not Found${CRLF}`);
+            }
+
+            return `${lineSep}${contentTypeApp}${lineSep}Content-Length: 
+            ${fileInfo[0]}${CRLF}${fileInfo[1]}`;
         } 
         catch (error) {
             console.log('Erro buscando arquivos: '+error.message);
@@ -90,25 +99,21 @@ const server = net.createServer(async (socket) => {
             const path = startLine[1].split('/', 2)[1];
             const version = startLine[2];
             
-            const requestHeaders = {
-                startLine: {
-                    'method': startLine[0],
-                    'target': startLine[1],
-                    'version': startLine[2]
-                },
+            const requestHeaders = {     
+                'method': startLine[0],
+                'target': startLine[1],
+                'version': startLine[2],
                 'userAgent': headers[2]
             };
             
-            for (const line of headers) {
-                
+            for (const line of headers) {               
                 if (line == '') {
                     continue;
-                }
-                
+                }              
                 if (line.match('HTTP') || line.match('Host') || line.match('User-Agent')){
                     continue;
                 }
-                console.log('it: '+line)
+                
                 const values = line.split(' ');
                 requestHeaders[values[0]] = values[1];
             }
@@ -120,7 +125,7 @@ const server = net.createServer(async (socket) => {
                 return socket.write(res404)
             }
             
-            const body = await getBody(startLine[1], headers, socket);
+            const body = await getBody(requestHeaders, socket);
             const res200 = `${version} 200 OK${body}`;
             
             socket.write(res200);
