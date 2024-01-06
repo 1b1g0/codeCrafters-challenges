@@ -92,21 +92,23 @@ const server = net.createServer(async (socket) => {
             
             const requestHeaders = {
                 startLine: {
-                    method: startLine[0],
-                    target: startLine[1],
-                    version: startLine[2]
+                    'method': startLine[0],
+                    'target': startLine[1],
+                    'version': startLine[2]
                 },
-                userAgent: headers[2]
+                'userAgent': headers[2]
             };
             
             for (const line of headers) {
-                console.log('it: '+line)
-                if (line === '') {
+                
+                if (line == '') {
                     continue;
                 }
+                
                 if (line.match('HTTP') || line.match('Host') || line.match('User-Agent')){
                     continue;
                 }
+                console.log('it: '+line)
                 const values = line.split(' ');
                 requestHeaders[values[0]] = values[1];
             }
