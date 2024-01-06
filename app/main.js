@@ -132,7 +132,7 @@ const server = net.createServer(async (socket) => {
 
             if (body === false) {
                 console.log('entrou no if')
-                socket.write(res404);
+                socket.write(`${version} 404 Not Found${CRLF}`);
             } else {
                 const res200 = `${version} 200 OK${body}`;
                 return socket.write(res200);
