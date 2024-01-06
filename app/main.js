@@ -83,7 +83,7 @@ const server = net.createServer(async (socket) => {
     // 'ouvindo' conexoes
     console.log('Conectado com sucesso.')   
     try {
-        await socket.on('data', async (data) => {
+            socket.on('data', async (data) => {
             const headers = data.toString().split(`\r\n`);
            
             const startLine = headers[0].split(' ', 3);
@@ -98,6 +98,7 @@ const server = net.createServer(async (socket) => {
                 },
                 userAgent: headers[2]
             };
+            
             for (const line of headers) {
                 if (line == headers[headers.length - 1]) {
                     return;
