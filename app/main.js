@@ -134,9 +134,9 @@ const server = net.createServer(async (socket) => {
             }
             
             const body = await getBody(requestHeaders, socket);
-            console.log(body)
+            console.log('Retorno body:',body)
             if (!body) {
-                socket.write(res404);
+                return socket.write(res404);
             }
             const res200 = `${version} 200 OK${body}`;
             
