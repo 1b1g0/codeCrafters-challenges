@@ -105,9 +105,6 @@ const server = net.createServer(async (socket) => {
                 }
                 
                 const values = headers[line].split(' ');
-                // if (values[0] == '') {
-                //     return
-                // }
                 requestHeaders[values[0]] = values[1];
             }
 
